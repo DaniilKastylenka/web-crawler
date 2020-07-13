@@ -8,6 +8,6 @@ with top 10 total results.
 
 Steps to start application: 
 1. Build project to get .jar 
-2. By the command: java -jar <name of .jar>.jar
+2. Start application by the command: java -jar <name of .jar>.jar
 
 In the CommonUtils class you can change default values of InputData.
