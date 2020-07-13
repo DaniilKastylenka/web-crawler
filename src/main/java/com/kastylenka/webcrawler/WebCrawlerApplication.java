@@ -32,11 +32,6 @@ public class WebCrawlerApplication implements CommandLineRunner {
     public void run(String... args) {
         InputData inputData = createInputData();
 
-        System.out.println("Seed URL: " + inputData.getSeedUrl() + "\n"
-                + "Terms: " + inputData.getTerms() + "\n"
-                + "Max pages: " + inputData.getMaxPages() + "\n"
-                + "Max depth: " + inputData.getMaxDepth() + "\n"
-        );
         System.out.println("Start web crawling...");
 
         List<Result> results = webCrawler.start(inputData);
@@ -45,27 +40,37 @@ public class WebCrawlerApplication implements CommandLineRunner {
             System.err.println("Invalid url");
             return;
         }
+        System.out.println("Web crawling completed");
 
-        List<Result> topPages = results.stream()
-                .sorted((result, t1) -> t1.getTerms().get(TOTAL_HEADER) - result.getTerms().get(TOTAL_HEADER))
-                .limit(inputData.getTop())
-                .collect(toList());
+        List<String> headers = getHeaders(inputData);
 
-        List<String> headers = new ArrayList<>();
-        headers.add(LINK_HEADER);
-        headers.addAll(inputData.getTerms());
-        headers.add(TOTAL_HEADER);
-
-        FileExporter exporter = new CsvExporter(headers, writer);
-        exporter.export(EXPORT_PATH + ALL_PAGES_CSV, results);
-        exporter.export(EXPORT_PATH + TOP_PAGES_CSV, topPages);
+        List<Result> topPages = getTopPages(results, inputData.getTop());
 
         topPages.forEach(page -> {
             List<String> list = page.buildRow(headers);
             System.out.println(list);
         });
-        System.out.println("Web crawling completed");
+
+        FileExporter exporter = new CsvExporter(headers, writer);
+        exporter.export(EXPORT_PATH + ALL_PAGES_CSV, results);
+        exporter.export(EXPORT_PATH + TOP_PAGES_CSV, topPages);
+
         System.out.println("Exported to " + EXPORT_PATH);
+    }
+
+    private List<Result> getTopPages(List<Result> results, int topCount) {
+        return results.stream()
+                .sorted((result, t1) -> t1.getTerms().get(HEADER_TOTAL) - result.getTerms().get(HEADER_TOTAL))
+                .limit(topCount)
+                .collect(toList());
+    }
+
+    private List<String> getHeaders(InputData inputData) {
+        List<String> headers = new ArrayList<>();
+        headers.add(HEADER_LINK);
+        headers.addAll(inputData.getTerms());
+        headers.add(HEADER_TOTAL);
+        return headers;
     }
 
     private InputData createInputData() {
@@ -75,6 +80,11 @@ public class WebCrawlerApplication implements CommandLineRunner {
         inputData.setMaxPages(INPUT_DATA_MAX_PAGES);
         inputData.setMaxDepth(INPUT_DATA_MAX_DEPTH);
         inputData.setTop(INPUT_DATA_TOP);
+        System.out.println("Seed URL: " + inputData.getSeedUrl() + "\n"
+                + "Terms: " + inputData.getTerms() + "\n"
+                + "Max pages: " + inputData.getMaxPages() + "\n"
+                + "Max depth: " + inputData.getMaxDepth() + "\n"
+        );
         return inputData;
     }
 }

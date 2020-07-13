@@ -29,7 +29,7 @@ public class WebCrawlerTest {
 
     private Map<Integer, List<String>> linksMap = new HashMap<>();
 
-    private WebCrawler webCrawler = new WebCrawlerImpl(mockLinkConnector(), mockLinksContainer(), mockConverter());
+    private WebCrawler webCrawler = new WebCrawlerImpl(mockLinksContainer(), mockConverter());
 
     @Before
     public void initInputData() {
@@ -55,12 +55,6 @@ public class WebCrawlerTest {
         inputData.setSeedUrl("invalid url");
         List<Result> results = webCrawler.start(inputData);
         Assert.assertNull(results);
-    }
-
-    private LinkConnector mockLinkConnector() {
-        LinkConnector linkConnector = Mockito.mock(LinkConnector.class);
-        when(linkConnector.connect(anyString())).thenCallRealMethod();
-        return linkConnector;
     }
 
     private LinksContainer mockLinksContainer() {

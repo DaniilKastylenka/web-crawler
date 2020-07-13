@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static com.kastylenka.webcrawler.util.CommonUtils.TOTAL_HEADER;
+import static com.kastylenka.webcrawler.util.CommonUtils.HEADER_TOTAL;
 import static java.util.Objects.nonNull;
 
 @Getter
@@ -22,7 +22,7 @@ public class Result {
         int total = terms.entrySet().stream()
                 .mapToInt(Map.Entry::getValue)
                 .sum();
-        terms.put(TOTAL_HEADER, total);
+        terms.put(HEADER_TOTAL, total);
     }
 
     public List<String> buildRow(List<String> headers) {

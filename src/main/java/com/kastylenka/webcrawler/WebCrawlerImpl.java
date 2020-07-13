@@ -4,6 +4,7 @@ import com.kastylenka.webcrawler.converter.DocumentToWebPageConverter;
 import com.kastylenka.webcrawler.models.InputData;
 import com.kastylenka.webcrawler.models.Result;
 import com.kastylenka.webcrawler.models.WebPage;
+import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.springframework.stereotype.Component;
 
@@ -20,15 +21,13 @@ import static java.util.regex.Pattern.CASE_INSENSITIVE;
 @Component
 public class WebCrawlerImpl implements WebCrawler {
 
-    private LinkConnector linkConnector;
     private LinksContainer linksContainer;
     private DocumentToWebPageConverter converter;
 
     private List<Result> results = new ArrayList<>();
     private Set<String> visitedPages = new HashSet<>();
 
-    public WebCrawlerImpl(LinkConnector linkConnector, LinksContainer linksContainer, DocumentToWebPageConverter converter) {
-        this.linkConnector = linkConnector;
+    public WebCrawlerImpl(LinksContainer linksContainer, DocumentToWebPageConverter converter) {
         this.linksContainer = linksContainer;
         this.converter = converter;
     }
@@ -40,7 +39,7 @@ public class WebCrawlerImpl implements WebCrawler {
         int maxPages = inputData.getMaxPages();
         int maxDepth = inputData.getMaxDepth();
 
-        Document seedPage = linkConnector.connect(seedUrl);
+        Document seedPage = connect(seedUrl);
         if (isNull(seedPage)) {
             return null;
         }
@@ -63,7 +62,7 @@ public class WebCrawlerImpl implements WebCrawler {
                     count--;
                     continue;
                 }
-                Document document = linkConnector.connect(currentLink);
+                Document document = connect(currentLink);
                 if (isNull(document)) {
                     count--;
                     continue;
@@ -97,5 +96,13 @@ public class WebCrawlerImpl implements WebCrawler {
         result.setLink(webPage.getUrl());
         result.addTotal();
         return result;
+    }
+
+    private Document connect(String url) {
+        try {
+            return Jsoup.connect(url).get();
+        } catch (Exception e) {
+            return null;
+        }
     }
 }
